@@ -20,7 +20,7 @@ public class AppUser {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="merchant_id")
-    private Merchant merchantId;
+    private Merchant merchant;
 
     @Column(unique = true,nullable = false)
     private String email;
