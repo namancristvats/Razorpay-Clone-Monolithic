@@ -6,10 +6,7 @@ import com.ncv.razorpay.payment.service.PaymentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
@@ -23,6 +20,11 @@ public class PaymentController {
     @PostMapping("/initiate")
     public ResponseEntity<PaymentResponse> initiatePayment(@RequestBody @Valid PaymentInitrequest request){
         PaymentResponse paymentResponse=paymentService.initiate(request,merchantId);
+        return ResponseEntity.ok(paymentResponse);
+    }
+    @PostMapping("/{paymentId}/capture")
+    public ResponseEntity<PaymentResponse> capturePayment(@PathVariable UUID paymentId){
+        PaymentResponse paymentResponse=paymentService.capture(paymentId,merchantId);
         return ResponseEntity.ok(paymentResponse);
     }
 }

@@ -8,4 +8,6 @@ import java.util.UUID;
 
 public interface PaymentService {
     PaymentResponse initiate(@Valid PaymentInitrequest request, UUID merchantId);
+
+    PaymentResponse capture(UUID paymentId, UUID merchantId);
 }
