@@ -61,6 +61,8 @@ public class PaymentServiceImpl implements PaymentService {
         //Payment Gateway Implementation will be here.......
         PaymentRequest paymentRequest=
                 new PaymentRequest(payment.getId(),request.orderId(),merchantId,order.getAmount(),request.method(),request.methodDetails());
+
+        paymentTransitionLogService.apply(payment, PaymentEvent.AUTHORIZE_ATTEMPT);
         PaymentResult paymentResult=router.initiate(paymentRequest);
 
         switch (paymentResult){
@@ -110,4 +112,45 @@ public class PaymentServiceImpl implements PaymentService {
         return paymentMapper.toResponse(payment);
 
     }
-}
+
+    @Override
+    @Transactional
+    public void resolveAuthorization(UUID paymentId, boolean approve, String bankRef, String errorCode, String errorDescription) {
+        Payment payment=paymentRepository.findById(paymentId)
+                .orElseThrow(()->new ResourceNotFoundException("Payment",paymentId));
+
+        if(payment.getStatus()!=PaymentStatus.AUTHORIZING){
+            log.warn("Payment is not in Authorizing state,paymentId:{} and status {}",paymentId,payment.getStatus());
+            return;
+        }
+        OrderRecord order=payment.getOrder();
+        if(approve) {
+            paymentTransitionLogService.apply(payment, PaymentEvent.AUTHORIZE_SUCCESS);
+            payment.setBankReference(bankRef);
+            payment.setAuthorizedAt(LocalDateTime.now());
+
+            //Auto Capture
+            paymentTransitionLogService.apply(payment, PaymentEvent.CAPTURE_REQUEST);
+            PaymentResult captureResult = router.capture(payment.getMethod(), paymentId);
+            if (captureResult instanceof PaymentResult.Success success) {
+                paymentTransitionLogService.apply(payment, PaymentEvent.CAPTURE_SUCCESS);
+                payment.setCapturedAt(LocalDateTime.now());
+                order.setOrderStatus(OrderStatus.PAID);
+
+            } else if (captureResult instanceof PaymentResult.Failure failure) {
+                paymentTransitionLogService.apply(payment, PaymentEvent.CAPTURE_FAIL);
+                payment.setErrorCode(failure.errorCode());
+                payment.setErrorDescription(failure.errorDescription());
+            }
+        }
+            else{
+                paymentTransitionLogService.apply(payment,PaymentEvent.AUTHORIZE_FAIL);
+                payment.setErrorCode(errorCode);
+                payment.setErrorDescription(errorDescription);
+            }
+            paymentRepository.save(payment);
+            orderRepository.save(order);
+            //Todo publish kafka events
+        }
+    }
+
