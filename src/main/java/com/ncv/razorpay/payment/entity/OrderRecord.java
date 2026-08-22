@@ -1,5 +1,6 @@
 package com.ncv.razorpay.payment.entity;
 
+import com.ncv.razorpay.common.entity.BaseEntity;
 import com.ncv.razorpay.common.entity.Money;
 import com.ncv.razorpay.common.enums.OrderStatus;
 import com.ncv.razorpay.merchant.entity.Merchant;
@@ -19,7 +20,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class OrderRecord {
+public class OrderRecord extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;

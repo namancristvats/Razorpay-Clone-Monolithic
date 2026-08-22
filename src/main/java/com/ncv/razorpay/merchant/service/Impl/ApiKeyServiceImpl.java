@@ -15,6 +15,7 @@ import jakarta.annotation.Nullable;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +31,7 @@ import java.util.stream.Collectors;
 public class ApiKeyServiceImpl implements ApiKeyService {
     private final MerchantRepository merchantRepository;
     private final ApiKeyRepository apiKeyRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
@@ -41,7 +43,7 @@ public class ApiKeyServiceImpl implements ApiKeyService {
         ApiKey apiKey= ApiKey.builder()
                 .merchant(merchant)
                 .keyId(keyID)
-                .keySecretHash(rawSecret)//TODO : Encode with BCrypt Password
+                .keySecretHash(passwordEncoder.encode(rawSecret))//TODO : Encode with BCrypt Password
                 .environment(request.environment())
                 .build();
 
