@@ -29,6 +29,9 @@ public class OrderRecord extends BaseEntity {
     @Column(name = "merchant_id", nullable = false)
     private UUID merchantId;
 
+    @Column(name = "customer_id")
+    private UUID customerId;
+
     @Embedded
     private Money amount;
     @Column(length = 100)
@@ -39,6 +42,7 @@ public class OrderRecord extends BaseEntity {
     private OrderStatus orderStatus = OrderStatus.CREATED;
 
     @Column(nullable = false)
+    @Builder.Default
     private Integer attempts = 0;
 
     @JdbcTypeCode((SqlTypes.JSON))
