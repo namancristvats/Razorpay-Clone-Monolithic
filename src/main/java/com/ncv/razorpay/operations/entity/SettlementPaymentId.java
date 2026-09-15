@@ -2,10 +2,16 @@ package com.ncv.razorpay.operations.entity;
 
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Entity;
+import lombok.*;
 
 import java.util.UUID;
 
 @Embeddable
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode
 public class SettlementPaymentId {
     private UUID settlementId;
 

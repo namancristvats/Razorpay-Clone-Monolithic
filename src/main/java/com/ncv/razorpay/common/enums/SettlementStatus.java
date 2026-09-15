@@ -1,7 +1,8 @@
 package com.ncv.razorpay.common.enums;
 
 public enum SettlementStatus {
-        INITIATED,
-        PROCESSED,
-        FAILED
+    INITIATED,
+    TRANSFER_PENDING,
+    PROCESSED,
+    FAILED
     }
